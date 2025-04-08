@@ -1,0 +1,56 @@
+.wp-todo-app {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.todo-form {
+    margin-bottom: 20px;
+}
+
+.todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.todo-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #fff;
+    border: 1px solid #000000;
+    border-radius: 2px;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #757575;
+}
+
+.todo-item.optimistic {
+    opacity: 0.7;
+    background-color: #fff8e1;
+}
+
+.todo-item.saving {
+    border-left: 3px solid #ffb900;
+}
+
+.todo-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.todo-edit-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.todo-edit-form .components-text-control__input {
+    flex-grow: 1;
+}
+
+.todo-spinner {
+    margin-left: 8px;
+    float: right;
+}
