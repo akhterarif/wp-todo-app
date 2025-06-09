@@ -3,7 +3,6 @@ export const getTodos = (state) =>{
         let todo = state.todoMapper[id]; 
         return todo || {};
     });
-    console.log('Todos:', todos);
     return todos || [];
 };
 

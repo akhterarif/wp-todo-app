@@ -51,11 +51,15 @@ class WP_Todo_API {
     }
 
     public function get_todos() {
-        $todos = get_option('wp_todo_app_todos', []);
-        error_log('Todos fetched: ' . print_r($todos, true)); // Debugging line
+        $todos = $this->todo_db_utils->select()
+            ->where('user_id', get_current_user_id(), '%d')
+            ->order_by('created_at', 'DESC')
+            ->get_results(true);
+            
         $todos = array_map(function($todo) {
             return (object) $todo;
         }, $todos);
+
         return new WP_REST_Response($todos, 200);
     }
 
@@ -63,7 +67,8 @@ class WP_Todo_API {
         $new_todo = [
             'title' => sanitize_text_field($request['title']),
             'completed' => false,
-            'created_at' => current_time('mysql')
+            'created_at' => current_time('mysql'),
+            'user_id' => get_current_user_id(),
         ];
 
         $created_todo = $this->todo_db_utils->insert($new_todo, ['%s', '%d', '%s']);
@@ -82,17 +87,20 @@ class WP_Todo_API {
         $updated_todo = array_merge(
             $todo,
             [
-                'updated_at' => current_time('mysql')
+                'updated_at' => current_time('mysql'),
+                'user_id' => get_current_user_id(),
             ]
         );
 
         $updated_todo = $this->todo_db_utils->update(
             $updated_todo,
-            ['id' => $id],
+            [
+                'id' => $id,
+                'user_id' => get_current_user_id()
+            ],
             ['%s', '%d', '%s'],
             ['%d']
         );
-
 
         if ($updated_todo === false) {
             return new WP_Error('db_error', 'Failed to update todo', ['status' => 500]);
@@ -101,20 +109,16 @@ class WP_Todo_API {
         if (empty($updated_todo)) {
             return new WP_Error('not_found', 'Todo not found', ['status' => 404]);
         }
-
-
         return new WP_REST_Response($updated_todo, 200);
     }
 
     public function delete_todo($request) {
-        $todos = get_option('wp_todo_app_todos', []);
         $id = $request['id'];
-
-        $new_todos = array_filter($todos, fn($todo) => $todo['id'] != $id);
-        update_option('wp_todo_app_todos', $new_todos);
-
+        $deleted = $this->todo_db_utils->delete( $id );
+        if (empty($deleted)) {
+            return new WP_Error('db_error', 'Failed to delete todo', ['status' => 500]);
+        }
         return new WP_REST_Response(['success' => true], 200);
     }
 }
 
-new WP_Todo_API();

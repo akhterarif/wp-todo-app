@@ -18,8 +18,6 @@ export const fetchTodos = () => async ({ dispatch }) => {
     try {
         const todos = await apiFetchWithNonce({ path: '/wp-todo-app/v1/todos' });
         
-        console.log("todos", todos);
-
         dispatch({ type: actionTypes.FETCH_TODOS_SUCCESS, todos: todos });
     } catch (error) {
         dispatch({ type: actionTypes.FETCH_TODOS_FAILURE, error, todos: [] });

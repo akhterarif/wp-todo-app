@@ -13,14 +13,12 @@ const reducer = (state = DEFAULT_STATE, action) => {
             return { ...state, loading: true, error: null };
 
         case actionTypes.FETCH_TODOS_SUCCESS: {
-            console.log("action.todos", action.todos);
             const todoIds = action.todos.map(todo => todo.id);
             const todoMapper = action.todos.reduce((acc, todo) => {
                 acc[todo.id] = todo;
                 return acc;
             }, {});
             const updatedState = { ...state, loading: false, todoIds, todoMapper };
-            console.log("updatedState", updatedState);
             return updatedState;
         }
         case actionTypes.FETCH_TODOS_FAILURE:
@@ -29,10 +27,11 @@ const reducer = (state = DEFAULT_STATE, action) => {
         case actionTypes.ADD_TODO_OPTIMISTIC: {
             return {
                 ...state,
-                todoIds: [...state.todoIds, action.todo.id],
+                todoIds: [ action.todo.id, ...state.todoIds,],
                 todoMapper: {
-                    ...state.todoMapper,
                     [action.todo.id]: action.todo,
+                    ...state.todoMapper,
+                    
                 },
             };
         }

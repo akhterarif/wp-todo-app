@@ -16,6 +16,7 @@ class WP_Todo_DB_Utils {
     private $data = [];
     private $format = [];
     private $where_format = [];
+    private $order_by;
 
     public function __construct() {
         global $wpdb;
@@ -40,6 +41,15 @@ class WP_Todo_DB_Utils {
         $this->where[] = $condition;
         $this->data[] = $value;
         $this->where_format[] = $format;
+        return $this;
+    }
+
+    public function order_by($column, $direction = 'ASC') {
+        $direction = strtoupper($direction);
+        if (!in_array($direction, ['ASC', 'DESC'])) {
+            $direction = 'ASC';
+        }
+        $this->order_by = "$column $direction";
         return $this;
     }
 
@@ -70,19 +80,34 @@ class WP_Todo_DB_Utils {
         return $updated_object;
     }
 
-    public function delete() {
-        $where_clause = implode(' ', $this->where);
-        $this->query = "DELETE FROM {$this->table} WHERE $where_clause";
-        $this->wpdb->query($this->wpdb->prepare($this->query, $this->data));
-        return $this;
+    public function delete( $id = null ) {
+        if (!empty($id)) {
+            // Extract id from where conditions
+            $this->where('id', $id, '%d');
+            $result = $this->wpdb->delete($this->table, ['id' => $id], ['%d']);
+            $this->reset();
+            return $result;
+        }
+        return null;
     }
 
-    public function get_results() {
+    public function get_results( $show_query = false ) {
+        
         if (!empty($this->where)) {
             $where_clause = implode(' ', $this->where);
             $this->query .= " WHERE $where_clause";
         }
-        return $this->wpdb->get_results($this->wpdb->prepare($this->query, $this->data));
+
+        if (isset($this->order_by)) {
+            $this->query .= " ORDER BY {$this->order_by}";
+        }
+
+        $query = $this->wpdb->prepare($this->query, $this->data);
+        if ($show_query) {
+            error_log( '$query: ' . print_r( $query, true ) );
+        }
+
+        return $this->wpdb->get_results($query, ARRAY_A);
     }
 
     public function get_row() {
@@ -107,6 +132,7 @@ class WP_Todo_DB_Utils {
         $this->data = [];
         $this->format = [];
         $this->where_format = [];
+        $this->order_by = null;
         return $this;
     }
 }
