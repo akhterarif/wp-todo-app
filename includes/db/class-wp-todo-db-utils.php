@@ -47,12 +47,27 @@ class WP_Todo_DB_Utils {
         $this->data = $data;
         $this->format = $format;
         $this->wpdb->insert($this->table, $this->data, $this->format);
-        return $this->wpdb->insert_id;
+        $inserted_id = $this->wpdb->insert_id;
+        if ($inserted_id) {
+            $this->reset();
+            $this->select()->where('id', $inserted_id, '%d');
+            $inserted_object = $this->get_row();
+            $this->reset();
+            return $inserted_object;
+        }
+        return null;
     }
 
     public function update($data, $where, $format = null, $where_format = null) {
         $this->wpdb->update($this->table, $data, $where, $format, $where_format);
-        return $this;
+        $updated_object = null;
+        if ($this->wpdb->rows_affected > 0 && isset($where['id'])) {
+            $this->reset();
+            $this->select()->where('id', $where['id'], '%d');
+            $updated_object = $this->get_row();
+            $this->reset();
+        }
+        return $updated_object;
     }
 
     public function delete() {

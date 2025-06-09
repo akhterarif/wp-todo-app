@@ -26,11 +26,11 @@ export const fetchTodos = () => async ({ dispatch }) => {
     }
 };
 
-export const addTodo = (text) => async ({ dispatch }) => {
+export const addTodo = (title) => async ({ dispatch }) => {
     const tempId = `temp-${Date.now()}`;
     const optimisticTodo = {
         id: tempId,
-        text,
+        title,
         completed: false,
         isOptimistic: true,
     };
@@ -44,9 +44,9 @@ export const addTodo = (text) => async ({ dispatch }) => {
         const savedTodo = await apiFetchWithNonce({
             path: '/wp-todo-app/v1/todos',
             method: 'POST',
-            data: { text },
+            data: { title },
         });
-
+        
         dispatch({
             type: actionTypes.ADD_TODO_SUCCESS,
             tempId,

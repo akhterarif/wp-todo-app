@@ -14,16 +14,21 @@ class WP_Todo_Installer {
      */
     public static function activate() {
         // Create custom database tables or set default options here.
-        self::create_todos_tables();
         self::create_todo_categories_table();
+        self::create_todos_tables();
         // Set default options for the plugin.
         self::set_default_options();
+
+
+        error_log( 'activated: ' . print_r( '', true ) );
     }
 
     /**
      * Create necessary database tables.
      */
-    private static function create_todos_tables() {
+    private static function create_todos_tables() { 
+
+        error_log( 'I am here: ' . print_r( '', true ) );
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'wp_todo_items';
@@ -39,6 +44,7 @@ class WP_Todo_Installer {
             priority ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'medium',
             status VARCHAR(20) NOT NULL DEFAULT 'pending',
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
             scheduled_at DATETIME,
             FOREIGN KEY (category_id) REFERENCES {$wpdb->prefix}wp_todo_categories(id) ON DELETE SET NULL ON UPDATE CASCADE,
             PRIMARY KEY (id)
@@ -76,6 +82,3 @@ class WP_Todo_Installer {
         add_option( 'wp_todo_default_status', 'pending' );
     }
 }
-
-// Hook the activation function.
-register_activation_hook( __FILE__, array( 'WP_Todo_Installer', 'activate' ) );

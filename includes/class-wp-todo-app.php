@@ -4,6 +4,9 @@ class WP_Todo_App {
     public function __construct() {
         add_action('admin_menu', [$this, 'add_admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+
+
+        $this->register_classes();
     }
 
     public function add_admin_menu() {
@@ -46,5 +49,12 @@ class WP_Todo_App {
             [],
             filemtime(plugin_dir_path(__FILE__) . '../dist/css/tailwind.css')
         );
+    }
+
+
+    public function register_classes() {
+        require_once plugin_dir_path(__FILE__) . '/class-wp-todo-api.php';
+        
+        new WP_Todo_API();
     }
 }
